@@ -1,0 +1,105 @@
+using System;
+using System.Collections.Generic;
+
+class SalaAuditorio
+{
+    public int CapacidadTotal { get; private set; }
+    public int AsientoDisponible { get; private set; }
+    private Queue<string> Fila1;
+    private Queue<string> Fila2;
+    private List<string> RegistroAsientos;
+    private Dictionary<string, int> RegistroFilas;
+
+    public SalaAuditorio(int capacidad)
+    {
+        CapacidadTotal = capacidad;
+        AsientoDisponible = 1;
+        Fila1 = new Queue<string>();
+        Fila2 = new Queue<string>();
+        RegistroAsientos = new List<string>();
+        RegistroFilas = new Dictionary<string, int>();
+    }
+
+    public void RegistrarInvitado(string nombre, int fila)
+    {
+        if (fila == 1)
+            Fila1.Enqueue(nombre);
+        else if (fila == 2)
+            Fila2.Enqueue(nombre);
+        else
+        {
+            Console.WriteLine("Fila inválida. Intente nuevamente.");
+            return;
+        }
+        RegistroFilas[nombre] = fila;
+    }
+
+    public void AsignarLugar()
+    {
+        if (AsientoDisponible <= CapacidadTotal)
+        {
+            string asignado = "";
+            int filaAsignada = 0;
+            
+            if (Fila1.Count > 0)
+            {
+                asignado = Fila1.Dequeue();
+                filaAsignada = 1;
+            }
+            else if (Fila2.Count > 0)
+            {
+                asignado = Fila2.Dequeue();
+                filaAsignada = 2;
+            }
+
+            if (!string.IsNullOrEmpty(asignado))
+            {
+                RegistroAsientos.Add($"Asiento {AsientoDisponible}: {asignado} (Fila {filaAsignada})");
+                Console.WriteLine($"Asignado: {asignado} en el asiento {AsientoDisponible} desde la Fila {filaAsignada}\n");
+                AsientoDisponible++;
+            }
+        }
+    }
+
+    public void MostrarCapacidad()
+    {
+        int ocupados = RegistroAsientos.Count;
+        int disponibles = CapacidadTotal - ocupados;
+        Console.WriteLine($"Asientos ocupados: {ocupados} | Asientos disponibles: {disponibles}\n");
+    }
+
+    public void ListarAsignaciones()
+    {
+        Console.WriteLine("\nAsignaciones completas. Listado final:");
+        foreach (var asignacion in RegistroAsientos)
+        {
+            Console.WriteLine(asignacion);
+        }
+    }
+}
+
+class Aplicacion
+{
+    static void Main()
+    {
+        SalaAuditorio sala = new SalaAuditorio(100);
+        Console.WriteLine("********** Universidad Estatal Amazónica *********\n");
+        Console.WriteLine("Bienvenidos al sistema de gestión de asientos");
+        Console.WriteLine("Existen dos filas de ingreso. Fila 1 y Fila 2.\n");
+        
+        while (sala.AsientoDisponible <= sala.CapacidadTotal)
+        {
+            Console.WriteLine("Invitado, ingresa tu nombre:");
+            Console.Write("Nombre: ");
+            string nombre = Console.ReadLine();
+            Console.Write("Escoge la fila (1 o 2): ");
+            int fila = int.Parse(Console.ReadLine());
+            
+            sala.RegistrarInvitado(nombre, fila);
+            sala.AsignarLugar();
+            sala.MostrarCapacidad();
+        }
+
+        sala.ListarAsignaciones();
+    }
+}
